@@ -20,7 +20,6 @@ const routes = [
     path: '/catalog/:id',
     component: () => import('../views/ProductDetails.vue')
   },
-
   {
     path: '/profile',
     component: () => import('../views/ProfileView.vue'),
@@ -34,6 +33,11 @@ const routes = [
         component: () => import('../views/ProfileSettings.vue')
       }
     ]
+  },
+
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('../views/NotFound.vue')
   }
 ]
 
