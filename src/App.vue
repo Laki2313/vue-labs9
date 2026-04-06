@@ -2,11 +2,7 @@
   <div class="app">
     <h1>Каталог постів</h1>
 
-    <input
-      v-model="query"
-      placeholder="Пошук..."
-      class="search"
-    />
+    <input v-model="query" placeholder="Пошук..." class="search" />
 
     <p v-if="isLoading">Завантаження...</p>
 
@@ -23,11 +19,21 @@
 
     <div v-if="selectedItem" class="details">
       <h2>Деталі поста</h2>
-
       <h3>{{ selectedItem.title }}</h3>
       <p>{{ selectedItem.body }}</p>
-
       <button @click="selectedItem = null">Закрити</button>
+    </div>
+
+    <div class="pagination">
+      <button @click="prevPage" :disabled="page === 1">
+        ⬅️ Попередня
+      </button>
+
+      <span>Сторінка: {{ page }}</span>
+
+      <button @click="nextPage" :disabled="!hasMore">
+        Наступна ➡️
+      </button>
     </div>
   </div>
 </template>
@@ -43,8 +49,12 @@ export default {
     const selectedItem = ref(null)
 
     const query = ref('')
+    const page = ref(1)
+    const limit = 5
+    const hasMore = ref(true)
 
-  
+    let controller = null 
+
     const filteredItems = computed(() => {
       return items.value.filter(item =>
         item.title.toLowerCase().includes(query.value.toLowerCase())
@@ -52,24 +62,47 @@ export default {
     })
 
     const loadItems = async () => {
+
+      if (controller) controller.abort()
+      controller = new AbortController()
+
       isLoading.value = true
       error.value = null
 
       try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/posts?_page=${page.value}&_limit=${limit}`,
+          { signal: controller.signal }
+        )
 
         if (!response.ok) {
           throw new Error('Помилка сервера')
         }
 
         const data = await response.json()
-        items.value = data.slice(0, 10)
+        items.value = data
+
+        hasMore.value = data.length === limit
 
       } catch (err) {
-        error.value = err.message
-        items.value = []
+        if (err.name !== 'AbortError') {
+          error.value = err.message
+          items.value = []
+        }
       } finally {
         isLoading.value = false
+      }
+    }
+
+    const nextPage = () => {
+      page.value++
+      loadItems()
+    }
+
+    const prevPage = () => {
+      if (page.value > 1) {
+        page.value--
+        loadItems()
       }
     }
 
@@ -88,7 +121,11 @@ export default {
       selectedItem,
       selectItem,
       query,
-      filteredItems
+      filteredItems,
+      page,
+      nextPage,
+      prevPage,
+      hasMore
     }
   }
 }
@@ -112,11 +149,20 @@ li {
 
 button {
   margin-left: 10px;
+  padding: 5px 10px;
 }
 
 .details {
   margin-top: 30px;
   padding: 15px;
   border: 1px solid #ccc;
+}
+
+.pagination {
+  margin-top: 30px;
+}
+
+.pagination button {
+  margin: 0 10px;
 }
 </style>
