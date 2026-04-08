@@ -1,13 +1,13 @@
 <template>
-  <RegistrationForm />
+  <PostsView />
 </template>
 
 <script>
-import RegistrationForm from './components/RegistrationForm.vue'
+import PostsView from './views/PostsView.vue'
 
 export default {
   components: {
-    RegistrationForm
+    PostsView
   }
 }
 </script>
