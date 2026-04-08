@@ -3,13 +3,16 @@
     <h1>Пости</h1>
 
     <p v-if="store.isLoading">Завантаження...</p>
+
     <p v-else-if="store.error">{{ store.error }}</p>
 
-    <ul v-else>
-      <li v-for="post in store.items" :key="post.id">
-        {{ post.title }}
+    <ul v-else-if="store.items.length">
+      <li v-for="item in store.items" :key="item.id">
+        {{ item.title }}
       </li>
     </ul>
+
+    <p v-else>Немає даних</p>
   </div>
 </template>
 
