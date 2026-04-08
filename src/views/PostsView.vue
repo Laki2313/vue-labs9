@@ -2,6 +2,27 @@
   <div>
     <h1>Пости</h1>
 
+    <input
+      v-model="store.query"
+      @input="store.fetchItems"
+      placeholder="Пошук..."
+    />
+
+    <div class="pagination">
+      <button
+        @click="prevPage"
+        :disabled="store.page === 1"
+      >
+        Попередня
+      </button>
+
+      <span>Сторінка: {{ store.page }}</span>
+
+      <button @click="nextPage">
+        Наступна
+      </button>
+    </div>
+
     <p v-if="store.isLoading">Завантаження...</p>
 
     <p v-else-if="store.error">{{ store.error }}</p>
@@ -16,19 +37,20 @@
   </div>
 </template>
 
-<script>
-import { onMounted } from 'vue'
+<script setup>
 import { usePostsStore } from '../stores/postsStore'
 
-export default {
-  setup() {
-    const store = usePostsStore()
+const store = usePostsStore()
 
-    onMounted(() => {
-      store.fetchItems()
-    })
+const nextPage = () => {
+  store.page++
+  store.fetchItems()
+}
 
-    return { store }
+const prevPage = () => {
+  if (store.page > 1) {
+    store.page--
+    store.fetchItems()
   }
 }
 </script>
